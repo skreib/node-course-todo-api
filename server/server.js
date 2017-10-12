@@ -23,7 +23,7 @@ app.post('/todos', (req, res) => {
     res.status(201).send(doc);
   }, (err) => {
     res.status(400).send(err);
-  })
+  });
 });
 
 app.get('/todos', (req, res) => {
@@ -94,6 +94,21 @@ app.patch('/todos/:id', (req, res) => {
     res.status(404).send();
   });
 })
+
+app.post('/users', (req, res) => {
+  let body = _.pick(req.body, ['email', 'password']);
+  let user = new User(body);
+
+   user.save().then((user) => {
+       return user.generateAuthToken();
+  }).then((token) => {
+       "use strict";
+       console.log(user);
+       res.header('x-auth', token).status(201).send(user.toJson());
+   }).catch((err) => {
+    res.status(400).send(err);
+  })
+});
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
