@@ -39,8 +39,25 @@ UserSchema.methods.generateAuthToken = function () {
     let token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
 
     user.tokens.push({access, token});
-    user.save().then(() => {
+    return user.save().then(() => {
         return token;
+    });
+};
+
+UserSchema.statics.findByToken = function (token) {
+    "use strict";
+    let User = this;
+    let decoded;
+    try {
+        decoded = jwt.verify(token, 'abc123');
+    } catch (e) {
+        return Promise.reject();
+    }
+
+    return User.findOne({
+        '_id': decoded._id,
+        'tokens.token': token,
+        'tokens.access': 'auth'
     });
 };
 
@@ -48,7 +65,6 @@ UserSchema.methods.toJson = function () {
     "use strict";
     let user = this;
     let userObject = user.toObject();
-    console.log(userObject);
     return _.pick(userObject, ['_id', 'email']);
 };
 

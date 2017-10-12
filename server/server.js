@@ -8,6 +8,7 @@ const {ObjectID} = require('mongodb');
 let {mongoose} = require('./db/mongoose');
 let {Todo} = require('./models/todo');
 let {User} = require('./models/user');
+const authenticate = require('./middleware/authenticate');
 
 let app = express();
 let port = process.env.PORT;
@@ -93,7 +94,7 @@ app.patch('/todos/:id', (req, res) => {
   }).catch((e) => {
     res.status(404).send();
   });
-})
+});
 
 app.post('/users', (req, res) => {
   let body = _.pick(req.body, ['email', 'password']);
@@ -103,11 +104,15 @@ app.post('/users', (req, res) => {
        return user.generateAuthToken();
   }).then((token) => {
        "use strict";
-       console.log(user);
-       res.header('x-auth', token).status(201).send(user.toJson());
+       res.header('x-auth', token).status(201).send(user);
    }).catch((err) => {
     res.status(400).send(err);
   })
+});
+
+app.get('/users/me', authenticate, (req, res) => {
+    "use strict";
+    req.send(req.user);
 });
 
 app.listen(port, () => {
