@@ -1,4 +1,4 @@
-const {User} = require('./../models/user')
+const {User} = require('./../models/user');
 
 let authenticate = (req, res, next) => {
     "use strict";
